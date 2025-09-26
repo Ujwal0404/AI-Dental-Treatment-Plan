@@ -1,103 +1,91 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { PatientData, TreatmentPlan } from '@/types';
+import PatientForm from '@/components/PatientForm';
+import TreatmentPlanDisplay from '@/components/TreatmentPlanDisplay';
+import { exportToPDF } from '@/utils/pdfExport';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isLoading, setIsLoading] = useState(false);
+  const [treatmentPlan, setTreatmentPlan] = useState<TreatmentPlan | null>(null);
+  const [patientData, setPatientData] = useState<PatientData | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+  const handleGeneratePlan = async (data: PatientData) => {
+    console.log('🎯 [FRONTEND] Starting plan generation for:', data.patientName);
+    setIsLoading(true);
+    setPatientData(data);
+    
+    try {
+      console.log('📤 [FRONTEND] Sending request to /api/generate-plan...');
+      const response = await fetch('/api/generate-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      console.log('📥 [FRONTEND] Received response:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('❌ [FRONTEND] API error:', errorData);
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+
+      const plan: TreatmentPlan = await response.json();
+      console.log('✅ [FRONTEND] Successfully received treatment plan:', {
+        diagnosisLength: plan.diagnosis.length,
+        phaseILength: plan.phaseI.length,
+        phaseIILength: plan.phaseII.length,
+        maintenanceLength: plan.maintenance.length,
+        recommendationsLength: plan.additionalRecommendations.length
+      });
+      setTreatmentPlan(plan);
+    } catch (error) {
+      console.error('❌ [FRONTEND] Error generating treatment plan:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to generate treatment plan: ${errorMessage}`);
+    } finally {
+      console.log('🏁 [FRONTEND] Plan generation completed');
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditPlan = (editedPlan: TreatmentPlan) => {
+    console.log('✏️ [FRONTEND] Plan edited, updating state');
+    setTreatmentPlan(editedPlan);
+  };
+
+  const handleBack = () => {
+    console.log('🔙 [FRONTEND] Back button clicked, returning to form');
+    setTreatmentPlan(null);
+    setPatientData(null);
+  };
+
+  const handleExportPDF = (doctorName?: string) => {
+    console.log('📄 [FRONTEND] Exporting PDF for doctor:', doctorName || 'Unknown');
+    if (patientData && treatmentPlan) {
+      exportToPDF(patientData, treatmentPlan, doctorName);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-gray-100 py-8">
+      <div className="container mx-auto px-4">
+        {!treatmentPlan ? (
+          <PatientForm onSubmit={handleGeneratePlan} isLoading={isLoading} />
+        ) : (
+          <TreatmentPlanDisplay
+            patientData={patientData!}
+            treatmentPlan={treatmentPlan}
+            onEdit={handleEditPlan}
+            onExportPDF={handleExportPDF}
+            onBack={handleBack}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        )}
+      </div>
+    </main>
   );
 }
