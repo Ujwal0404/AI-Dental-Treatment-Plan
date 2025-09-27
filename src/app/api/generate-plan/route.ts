@@ -193,10 +193,10 @@ export async function POST(request: NextRequest) {
       console.log('🔍 [API] Parsed JSON:', parsed ? 'Success' : 'Failed');
       
       // Coerce nested objects to strings if needed
-      const coerceToStrings = (obj: any): TreatmentPlan | null => {
-        if (!obj) return null;
+      const coerceToStrings = (obj: unknown): TreatmentPlan | null => {
+        if (!obj || typeof obj !== 'object') return null;
         
-        const formatValue = (value: any): string => {
+        const formatValue = (value: unknown): string => {
           if (typeof value === 'string') return value;
           if (typeof value === 'object' && value !== null) {
             if (Array.isArray(value)) {
@@ -216,13 +216,14 @@ export async function POST(request: NextRequest) {
         };
 
         try {
+          const objRecord = obj as Record<string, unknown>;
           return {
-            diagnosis: formatValue(obj.diagnosis),
-            prognosis: formatValue(obj.prognosis),
-            phaseI: formatValue(obj.phaseI),
-            phaseII: formatValue(obj.phaseII),
-            maintenance: formatValue(obj.maintenance),
-            additionalRecommendations: formatValue(obj.additionalRecommendations),
+            diagnosis: formatValue(objRecord.diagnosis),
+            prognosis: formatValue(objRecord.prognosis),
+            phaseI: formatValue(objRecord.phaseI),
+            phaseII: formatValue(objRecord.phaseII),
+            maintenance: formatValue(objRecord.maintenance),
+            additionalRecommendations: formatValue(objRecord.additionalRecommendations),
           };
         } catch (error) {
           console.log('❌ [API] Error in coercion:', error);

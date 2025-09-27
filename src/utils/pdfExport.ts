@@ -2,136 +2,254 @@ import jsPDF from 'jspdf';
 import { PatientData, TreatmentPlan } from '@/types';
 
 export const exportToPDF = (patientData: PatientData, treatmentPlan: TreatmentPlan, doctorName?: string) => {
-  console.log('📄 [PDF] Starting PDF export for:', patientData.patientName);
+  console.log('📄 [PDF] Starting enhanced PDF export for:', patientData.patientName);
   console.log('👨‍⚕️ [PDF] Doctor name:', doctorName || 'Not provided');
   
   const doc = new jsPDF();
-  
-  // Set font
-  doc.setFont('helvetica');
-  
-  // Title
-  doc.setFontSize(20);
-  doc.text('Periodontal Treatment Plan', 20, 30);
-  
-  // Doctor Name
-  if (doctorName) {
-    doc.setFontSize(12);
-    doc.text(`Treating Dentist: ${doctorName}`, 20, 40);
-  }
-  
-  console.log('📝 [PDF] Adding patient information...');
-  
-  // Patient Information
-  doc.setFontSize(14);
-  doc.text('Patient Information:', 20, 50);
-  doc.setFontSize(12);
-  doc.text(`Name: ${patientData.patientName}`, 20, 60);
-  doc.text(`Age: ${patientData.age} years`, 20, 68);
-  doc.text(`Gender: ${patientData.gender}`, 20, 76);
-  
-  // Symptoms
-  const symptoms = Object.entries(patientData.symptoms)
-    .filter(([_, value]) => value)
-    .map(([key, _]) => {
-      const labels: Record<string, string> = {
-        bleedingGums: 'Bleeding Gums',
-        toothMobility: 'Tooth Mobility',
-        halitosis: 'Halitosis',
-        sensitivity: 'Sensitivity',
-        pain: 'Pain',
-      };
-      return labels[key];
-    });
-  
-  doc.text(`Symptoms: ${symptoms.length > 0 ? symptoms.join(', ') : 'None reported'}`, 20, 84);
-  
-  // Medical History
-  doc.text('Medical History:', 20, 100);
-  const medicalHistoryLines = doc.splitTextToSize(patientData.medicalHistory, 170);
-  doc.text(medicalHistoryLines, 20, 108);
-  
-  // Dental History
-  const dentalHistoryY = 108 + (medicalHistoryLines.length * 5) + 10;
-  doc.text('Dental History:', 20, dentalHistoryY);
-  const dentalHistoryLines = doc.splitTextToSize(patientData.dentalHistory, 170);
-  doc.text(dentalHistoryLines, 20, dentalHistoryY + 8);
-  
-  // Periodontal Findings (safe access with fallbacks)
-  const periodontalY = dentalHistoryY + 8 + (dentalHistoryLines.length * 5) + 10;
-  const findings = patientData.periodontalFindings || {
-    probingDepths: '',
-    gingivalRecession: '',
-    mobilityGrade: '',
-    radiographicBoneLoss: '',
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentWidth = pageWidth - (margin * 2);
+  let currentY = margin;
+
+  // Colors
+  const colors = {
+    primary: [41, 128, 185],      // Blue
+    secondary: [52, 152, 219],    // Light Blue
+    success: [39, 174, 96],       // Green
+    warning: [241, 196, 15],      // Yellow
+    danger: [231, 76, 60],        // Red
+    dark: [52, 73, 94],           // Dark Gray
+    light: [236, 240, 241],       // Light Gray
+    text: [44, 62, 80],           // Text Gray
   };
-  doc.text('Periodontal Findings:', 20, periodontalY);
-  doc.text(
-    `Probing Depths: ${findings.probingDepths || 'N/A'}`,
-    20,
-    periodontalY + 8
-  );
-  doc.text(
-    `Gingival Recession: ${findings.gingivalRecession || 'N/A'}`,
-    20,
-    periodontalY + 16
-  );
-  doc.text(
-    `Mobility Grade: ${findings.mobilityGrade || 'N/A'}`,
-    20,
-    periodontalY + 24
-  );
-  doc.text(
-    `Radiographic Bone Loss: ${findings.radiographicBoneLoss || 'N/A'}`,
-    20,
-    periodontalY + 32
-  );
+
+  // Helper functions
+  const addHeader = () => {
+    // Header background
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, 0, pageWidth, 50, 'F');
+    
+    // Title
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PERIODONTAL TREATMENT PLAN', pageWidth / 2, 25, { align: 'center' });
+    
+    // Subtitle
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('AI-Generated Clinical Assessment', pageWidth / 2, 35, { align: 'center' });
+    
+    currentY = 70;
+  };
+
+  const addFooter = () => {
+    const footerY = pageHeight - 30;
+    doc.setFillColor(...colors.light);
+    doc.rect(0, footerY, pageWidth, 30, 'F');
+    
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, footerY + 15);
+    doc.text(`Page ${doc.getCurrentPageInfo().pageNumber}`, pageWidth - margin, footerY + 15, { align: 'right' });
+  };
+
+  const checkPageBreak = (neededSpace: number) => {
+    if (currentY + neededSpace > pageHeight - 50) {
+      addFooter();
+      doc.addPage();
+      addHeader();
+    }
+  };
+
+  const addSection = (title: string, content: string, color: number[]) => {
+    checkPageBreak(60);
+    
+    // Section header with colored bar
+    doc.setFillColor(...color);
+    doc.rect(margin, currentY - 5, contentWidth, 20, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, margin + 10, currentY + 7);
+    
+    currentY += 25;
+    
+    // Content
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    
+    // Process content for better formatting
+    const processedContent = content.replace(/•/g, '  •').replace(/\n\n/g, '\n \n');
+    const lines = doc.splitTextToSize(processedContent, contentWidth - 20);
+    
+    // Check if content fits on current page
+    const contentHeight = lines.length * 6;
+    checkPageBreak(contentHeight);
+    
+    doc.text(lines, margin + 10, currentY);
+    currentY += contentHeight + 15;
+  };
+
+  const addPatientInfo = () => {
+    checkPageBreak(120);
+    
+    // Patient info box
+    doc.setFillColor(...colors.light);
+    doc.rect(margin, currentY, contentWidth, 100, 'F');
+    doc.setDrawColor(...colors.primary);
+    doc.setLineWidth(1);
+    doc.rect(margin, currentY, contentWidth, 100);
+    
+    // Title
+    doc.setTextColor(...colors.primary);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PATIENT INFORMATION', margin + 10, currentY + 15);
+    
+    // Info in two columns
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    
+    const leftColumn = margin + 10;
+    const rightColumn = margin + (contentWidth / 2);
+    let infoY = currentY + 30;
+    
+    // Left column
+    doc.setFont('helvetica', 'bold');
+    doc.text('Patient Name:', leftColumn, infoY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(patientData.patientName, leftColumn + 35, infoY);
+    
+    infoY += 12;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Age:', leftColumn, infoY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${patientData.age} years`, leftColumn + 15, infoY);
+    
+    infoY += 12;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Gender:', leftColumn, infoY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(patientData.gender, leftColumn + 22, infoY);
+    
+    // Right column
+    infoY = currentY + 30;
+    if (doctorName) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Treating Dentist:', rightColumn, infoY);
+      doc.setFont('helvetica', 'normal');
+      doc.text(doctorName, rightColumn + 40, infoY);
+      infoY += 12;
+    }
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Date:', rightColumn, infoY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date().toLocaleDateString(), rightColumn + 15, infoY);
+    
+    // Symptoms
+    const symptoms = Object.entries(patientData.symptoms)
+      .filter(([, value]) => value)
+      .map(([key]) => {
+        const labels: Record<string, string> = {
+          bleedingGums: 'Bleeding Gums',
+          toothMobility: 'Tooth Mobility',
+          halitosis: 'Halitosis',
+          sensitivity: 'Sensitivity',
+          pain: 'Pain',
+        };
+        return labels[key];
+      });
+    
+    infoY += 20;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Presenting Symptoms:', leftColumn, infoY);
+    doc.setFont('helvetica', 'normal');
+    const symptomsText = symptoms.length > 0 ? symptoms.join(', ') : 'None reported';
+    const symptomLines = doc.splitTextToSize(symptomsText, contentWidth - 40);
+    doc.text(symptomLines, leftColumn, infoY + 8);
+    
+    currentY += 115;
+  };
+
+  const addClinicalFindings = () => {
+    // Medical History
+    addSection('MEDICAL HISTORY', patientData.medicalHistory, colors.danger);
+    
+    // Dental History  
+    addSection('DENTAL HISTORY', patientData.dentalHistory, colors.warning);
+    
+    // Periodontal Findings
+    const findings = patientData.periodontalFindings || {
+      probingDepths: '',
+      gingivalRecession: '',
+      mobilityGrade: '',
+      radiographicBoneLoss: '',
+    };
+    
+    const findingsText = `Probing Depths: ${findings.probingDepths || 'N/A'}
+
+Gingival Recession: ${findings.gingivalRecession || 'N/A'}
+
+Tooth Mobility: ${findings.mobilityGrade || 'N/A'}
+
+Radiographic Bone Loss: ${findings.radiographicBoneLoss || 'N/A'}`;
+    
+    addSection('PERIODONTAL FINDINGS', findingsText, colors.secondary);
+  };
+
+  const addDisclaimer = () => {
+    checkPageBreak(40);
+    
+    // Disclaimer box
+    doc.setFillColor(255, 252, 230); // Light yellow
+    doc.rect(margin, currentY, contentWidth, 30, 'F');
+    doc.setDrawColor(...colors.warning);
+    doc.setLineWidth(2);
+    doc.rect(margin, currentY, contentWidth, 30);
+    
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('⚠️ IMPORTANT DISCLAIMER', margin + 10, currentY + 12);
+    
+    doc.setFont('helvetica', 'normal');
+    const disclaimerText = 'This treatment plan is AI-generated and should be reviewed by a licensed dentist before implementation. Clinical judgment and individual patient assessment are essential for proper treatment decisions.';
+    const disclaimerLines = doc.splitTextToSize(disclaimerText, contentWidth - 20);
+    doc.text(disclaimerLines, margin + 10, currentY + 20);
+  };
+
+  // Generate PDF
+  console.log('🎨 [PDF] Creating professional multi-page PDF...');
   
-  // Treatment Plan
-  const treatmentY = periodontalY + 40;
-  doc.setFontSize(14);
-  doc.text('Treatment Plan:', 20, treatmentY);
+  // Page 1: Header, Patient Info, Clinical Findings
+  addHeader();
+  addPatientInfo();
+  addClinicalFindings();
   
-  doc.setFontSize(12);
-  doc.text('Diagnosis:', 20, treatmentY + 10);
-  const diagnosisLines = doc.splitTextToSize(treatmentPlan.diagnosis, 170);
-  doc.text(diagnosisLines, 20, treatmentY + 18);
+  // Page 2+: Treatment Plan Sections
+  addSection('DIAGNOSIS', treatmentPlan.diagnosis, colors.primary);
+  addSection('PROGNOSIS', treatmentPlan.prognosis, colors.secondary);
+  addSection('PHASE I: NON-SURGICAL THERAPY', treatmentPlan.phaseI, colors.success);
+  addSection('PHASE II: SURGICAL THERAPY', treatmentPlan.phaseII, colors.warning);
+  addSection('MAINTENANCE & RECALL SCHEDULE', treatmentPlan.maintenance, colors.primary);
+  addSection('ADDITIONAL RECOMMENDATIONS', treatmentPlan.additionalRecommendations, colors.secondary);
   
-  let currentY = treatmentY + 18 + (diagnosisLines.length * 5) + 10;
+  // Add disclaimer
+  addDisclaimer();
   
-  doc.text('Prognosis:', 20, currentY);
-  const prognosisLines = doc.splitTextToSize(treatmentPlan.prognosis, 170);
-  doc.text(prognosisLines, 20, currentY + 8);
-  currentY += 8 + (prognosisLines.length * 5) + 10;
-  
-  doc.text('Phase I: Non-surgical Therapy:', 20, currentY);
-  const phaseILines = doc.splitTextToSize(treatmentPlan.phaseI, 170);
-  doc.text(phaseILines, 20, currentY + 8);
-  currentY += 8 + (phaseILines.length * 5) + 10;
-  
-  doc.text('Phase II: Surgical Therapy:', 20, currentY);
-  const phaseIILines = doc.splitTextToSize(treatmentPlan.phaseII, 170);
-  doc.text(phaseIILines, 20, currentY + 8);
-  currentY += 8 + (phaseIILines.length * 5) + 10;
-  
-  doc.text('Maintenance/Recall Schedule:', 20, currentY);
-  const maintenanceLines = doc.splitTextToSize(treatmentPlan.maintenance, 170);
-  doc.text(maintenanceLines, 20, currentY + 8);
-  currentY += 8 + (maintenanceLines.length * 5) + 10;
-  
-  doc.text('Additional Recommendations:', 20, currentY);
-  const recommendationsLines = doc.splitTextToSize(treatmentPlan.additionalRecommendations, 170);
-  doc.text(recommendationsLines, 20, currentY + 8);
-  
-  // Disclaimer
-  currentY += 8 + (recommendationsLines.length * 5) + 20;
-  const disclaimerY = currentY;
-  doc.setFontSize(10);
-  doc.setTextColor(128, 128, 128);
-  doc.text('Disclaimer: This treatment plan is AI-generated and should be reviewed by a licensed dentist before implementation.', 20, disclaimerY);
+  // Add footer to last page
+  addFooter();
   
   // Save the PDF
-  console.log('💾 [PDF] Saving PDF file...');
-  doc.save(`treatment-plan-${patientData.patientName.replace(/\s+/g, '-').toLowerCase()}.pdf`);
-  console.log('✅ [PDF] PDF export completed successfully');
+  console.log('💾 [PDF] Saving enhanced PDF file...');
+  const fileName = `treatment-plan-${patientData.patientName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+  console.log('✅ [PDF] Enhanced PDF export completed successfully');
 };

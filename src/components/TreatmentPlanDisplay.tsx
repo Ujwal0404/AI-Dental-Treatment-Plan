@@ -49,8 +49,8 @@ export default function TreatmentPlanDisplay({
 
   const formatSymptoms = (symptoms: PatientData['symptoms']) => {
     const activeSymptoms = Object.entries(symptoms)
-      .filter(([_, value]) => value)
-      .map(([key, _]) => {
+      .filter(([, value]) => value)
+      .map(([key]) => {
         const labels: Record<string, string> = {
           bleedingGums: 'Bleeding Gums',
           toothMobility: 'Tooth Mobility',

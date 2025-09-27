@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PatientData, TreatmentPlan } from '@/types';
+import { PatientData } from '@/types';
 import { User, Calendar, FileText, Stethoscope, AlertCircle, Plus } from 'lucide-react';
 
 const patientSchema = z.object({
@@ -64,7 +63,8 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
     },
   });
 
-  const watchedSymptoms = watch('symptoms');
+  // Watch symptoms for dynamic form behavior if needed in the future
+  // const watchedSymptoms = watch('symptoms');
 
   const handleFormSubmit = (data: PatientData) => {
     console.log('📝 [FORM] Form submitted with data:', {
@@ -230,7 +230,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
             ].map((symptom) => (
               <label key={symptom.key} className="flex items-center space-x-2 text-gray-800">
                 <input
-                  {...register(`symptoms.${symptom.key as keyof typeof watchedSymptoms}`)}
+                  {...register(`symptoms.${symptom.key}` as keyof PatientData['symptoms'])}
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
