@@ -97,28 +97,35 @@ export const exportToPDF = (patientData: PatientData, treatmentPlan: TreatmentPl
   const diagnosisLines = doc.splitTextToSize(treatmentPlan.diagnosis, 170);
   doc.text(diagnosisLines, 20, treatmentY + 18);
   
-  const phaseIY = treatmentY + 18 + (diagnosisLines.length * 5) + 10;
-  doc.text('Phase I: Non-surgical Therapy:', 20, phaseIY);
+  let currentY = treatmentY + 18 + (diagnosisLines.length * 5) + 10;
+  
+  doc.text('Prognosis:', 20, currentY);
+  const prognosisLines = doc.splitTextToSize(treatmentPlan.prognosis, 170);
+  doc.text(prognosisLines, 20, currentY + 8);
+  currentY += 8 + (prognosisLines.length * 5) + 10;
+  
+  doc.text('Phase I: Non-surgical Therapy:', 20, currentY);
   const phaseILines = doc.splitTextToSize(treatmentPlan.phaseI, 170);
-  doc.text(phaseILines, 20, phaseIY + 8);
+  doc.text(phaseILines, 20, currentY + 8);
+  currentY += 8 + (phaseILines.length * 5) + 10;
   
-  const phaseIIY = phaseIY + 8 + (phaseILines.length * 5) + 10;
-  doc.text('Phase II: Surgical Therapy:', 20, phaseIIY);
+  doc.text('Phase II: Surgical Therapy:', 20, currentY);
   const phaseIILines = doc.splitTextToSize(treatmentPlan.phaseII, 170);
-  doc.text(phaseIILines, 20, phaseIIY + 8);
+  doc.text(phaseIILines, 20, currentY + 8);
+  currentY += 8 + (phaseIILines.length * 5) + 10;
   
-  const maintenanceY = phaseIIY + 8 + (phaseIILines.length * 5) + 10;
-  doc.text('Maintenance/Recall Schedule:', 20, maintenanceY);
+  doc.text('Maintenance/Recall Schedule:', 20, currentY);
   const maintenanceLines = doc.splitTextToSize(treatmentPlan.maintenance, 170);
-  doc.text(maintenanceLines, 20, maintenanceY + 8);
+  doc.text(maintenanceLines, 20, currentY + 8);
+  currentY += 8 + (maintenanceLines.length * 5) + 10;
   
-  const recommendationsY = maintenanceY + 8 + (maintenanceLines.length * 5) + 10;
-  doc.text('Additional Recommendations:', 20, recommendationsY);
+  doc.text('Additional Recommendations:', 20, currentY);
   const recommendationsLines = doc.splitTextToSize(treatmentPlan.additionalRecommendations, 170);
-  doc.text(recommendationsLines, 20, recommendationsY + 8);
+  doc.text(recommendationsLines, 20, currentY + 8);
   
   // Disclaimer
-  const disclaimerY = recommendationsY + 8 + (recommendationsLines.length * 5) + 20;
+  currentY += 8 + (recommendationsLines.length * 5) + 20;
+  const disclaimerY = currentY;
   doc.setFontSize(10);
   doc.setTextColor(128, 128, 128);
   doc.text('Disclaimer: This treatment plan is AI-generated and should be reviewed by a licensed dentist before implementation.', 20, disclaimerY);

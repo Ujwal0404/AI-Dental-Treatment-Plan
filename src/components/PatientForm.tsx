@@ -105,29 +105,30 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-3">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 max-w-4xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="p-2 bg-blue-100 rounded-lg">
-            <User className="h-6 w-6 text-blue-600" />
+            <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Periodontal Treatment Plan Generator</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 leading-tight">Periodontal Treatment Plan Generator</h1>
         </div>
         <button
           type="button"
           onClick={handleAddMock}
-          className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg flex items-center gap-2 border border-gray-300"
+          className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-3 sm:px-4 rounded-lg flex items-center gap-2 border border-gray-300 text-sm sm:text-base self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" />
-          Add mock entry
+          <span className="hidden sm:inline">Add mock entry</span>
+          <span className="sm:hidden">Mock</span>
         </button>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
         {/* Patient Basic Information */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <User className="h-5 w-5 text-blue-600" />
+        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Patient Information
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -138,7 +139,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               <input
                 {...register('patientName')}
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 placeholder="Enter patient name"
               />
               {errors.patientName && (
@@ -152,7 +153,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               <input
                 {...register('age', { valueAsNumber: true })}
                 type="number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 placeholder="Age"
               />
               {errors.age && (
@@ -165,7 +166,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               </label>
               <select
                 {...register('gender')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
               >
                 <option value="">Select gender</option>
                 <option value="male">Male</option>
@@ -180,15 +181,15 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
         </div>
 
         {/* Medical History */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-blue-600" />
+        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Medical History
           </h2>
           <textarea
             {...register('medicalHistory')}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
             placeholder="Enter relevant medical history, medications, allergies, systemic conditions..."
           />
           {errors.medicalHistory && (
@@ -197,15 +198,15 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
         </div>
 
         {/* Dental History */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
+        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Dental History
           </h2>
           <textarea
             {...register('dentalHistory')}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
             placeholder="Enter dental history, previous treatments, oral hygiene habits..."
           />
           {errors.dentalHistory && (
@@ -214,12 +215,12 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
         </div>
 
         {/* Symptoms */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-blue-600" />
+        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Symptoms
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[
               { key: 'bleedingGums', label: 'Bleeding Gums' },
               { key: 'toothMobility', label: 'Tooth Mobility' },
@@ -227,25 +228,25 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               { key: 'sensitivity', label: 'Sensitivity' },
               { key: 'pain', label: 'Pain' },
             ].map((symptom) => (
-              <label key={symptom.key} className="flex items-center space-x-2">
+              <label key={symptom.key} className="flex items-center space-x-2 text-gray-800">
                 <input
                   {...register(`symptoms.${symptom.key as keyof typeof watchedSymptoms}`)}
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="text-sm text-gray-700">{symptom.label}</span>
+                <span className="text-sm text-gray-800">{symptom.label}</span>
               </label>
             ))}
           </div>
         </div>
 
         {/* Periodontal Findings */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
+        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Periodontal Findings
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Probing Depths *
@@ -253,7 +254,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               <textarea
                 {...register('periodontalFindings.probingDepths')}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 placeholder="e.g., Generalized 4-6mm pockets, localized 7mm pockets in posterior areas"
               />
               {errors.periodontalFindings?.probingDepths && (
@@ -267,7 +268,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               <textarea
                 {...register('periodontalFindings.gingivalRecession')}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 placeholder="e.g., Miller Class I recession on teeth #6, #11"
               />
               {errors.periodontalFindings?.gingivalRecession && (
@@ -281,7 +282,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               <textarea
                 {...register('periodontalFindings.mobilityGrade')}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 placeholder="e.g., Grade I mobility on teeth #14, #19"
               />
               {errors.periodontalFindings?.mobilityGrade && (
@@ -295,7 +296,7 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
               <textarea
                 {...register('periodontalFindings.radiographicBoneLoss')}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 placeholder="e.g., Horizontal bone loss 30-50% in posterior areas"
               />
               {errors.periodontalFindings?.radiographicBoneLoss && (
@@ -310,17 +311,19 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 sm:px-8 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
           >
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Generating Plan...
+                <span className="hidden sm:inline">Generating Plan...</span>
+                <span className="sm:hidden">Generating...</span>
               </>
             ) : (
               <>
-                <FileText className="h-5 w-5" />
-                Generate Treatment Plan
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Generate Treatment Plan</span>
+                <span className="sm:hidden">Generate Plan</span>
               </>
             )}
           </button>

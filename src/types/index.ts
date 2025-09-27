@@ -21,6 +21,7 @@ export interface PatientData {
 
 export interface TreatmentPlan {
   diagnosis: string;
+  prognosis: string;
   phaseI: string;
   phaseII: string;
   maintenance: string;
