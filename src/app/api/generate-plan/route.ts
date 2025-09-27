@@ -105,14 +105,14 @@ Use professional terminology with bullet points (•) and numbered lists for org
 function tryParseJsonFromContent(content: string) {
   try {
     return JSON.parse(content);
-  } catch (_) {
+  } catch {
     // try to extract from code block
     const match = content.match(/```json[\s\S]*?```/i) || content.match(/```[\s\S]*?```/i);
     if (match) {
       const inner = match[0].replace(/```json|```/gi, '').trim();
       try {
         return JSON.parse(inner);
-      } catch (_) {
+      } catch {
         return null;
       }
     }
@@ -133,8 +133,8 @@ export async function POST(request: NextRequest) {
 
     // Format symptoms for the prompt
     const symptoms = Object.entries(patientData.symptoms)
-      .filter(([_, value]) => value)
-      .map(([key, _]) => {
+      .filter(([, value]) => value)
+      .map(([key]) => {
         const labels: Record<string, string> = {
           bleedingGums: 'Bleeding Gums',
           toothMobility: 'Tooth Mobility',
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
             try {
               finalParsed = JSON.parse(jsonMatch[0]);
               console.log('✅ [API] Successfully extracted JSON from text');
-            } catch (e) {
+            } catch {
               console.log('❌ [API] Failed to parse extracted JSON');
             }
           }

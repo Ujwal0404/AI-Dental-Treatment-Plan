@@ -37,7 +37,6 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm<PatientData>({
     resolver: zodResolver(patientSchema),
@@ -230,7 +229,8 @@ export default function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
             ].map((symptom) => (
               <label key={symptom.key} className="flex items-center space-x-2 text-gray-800">
                 <input
-                  {...register(`symptoms.${symptom.key}` as keyof PatientData['symptoms'])}
+                  // @ts-expect-error - register field path issue
+                  {...register(`symptoms.${symptom.key}`)}
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />

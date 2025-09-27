@@ -14,20 +14,20 @@ export const exportToPDF = (patientData: PatientData, treatmentPlan: TreatmentPl
 
   // Colors
   const colors = {
-    primary: [41, 128, 185],      // Blue
-    secondary: [52, 152, 219],    // Light Blue
-    success: [39, 174, 96],       // Green
-    warning: [241, 196, 15],      // Yellow
-    danger: [231, 76, 60],        // Red
-    dark: [52, 73, 94],           // Dark Gray
-    light: [236, 240, 241],       // Light Gray
-    text: [44, 62, 80],           // Text Gray
+    primary: [41, 128, 185] as const,      // Blue
+    secondary: [52, 152, 219] as const,    // Light Blue
+    success: [39, 174, 96] as const,       // Green
+    warning: [241, 196, 15] as const,      // Yellow
+    danger: [231, 76, 60] as const,        // Red
+    dark: [52, 73, 94] as const,           // Dark Gray
+    light: [236, 240, 241] as const,       // Light Gray
+    text: [44, 62, 80] as const,           // Text Gray
   };
 
   // Helper functions
   const addHeader = () => {
     // Header background
-    doc.setFillColor(...colors.primary);
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
     doc.rect(0, 0, pageWidth, 50, 'F');
     
     // Title
@@ -46,7 +46,7 @@ export const exportToPDF = (patientData: PatientData, treatmentPlan: TreatmentPl
 
   const addFooter = () => {
     const footerY = pageHeight - 30;
-    doc.setFillColor(...colors.light);
+    doc.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
     doc.rect(0, footerY, pageWidth, 30, 'F');
     
     doc.setTextColor(...colors.text);
@@ -64,11 +64,11 @@ export const exportToPDF = (patientData: PatientData, treatmentPlan: TreatmentPl
     }
   };
 
-  const addSection = (title: string, content: string, color: number[]) => {
+  const addSection = (title: string, content: string, color: readonly number[]) => {
     checkPageBreak(60);
     
     // Section header with colored bar
-    doc.setFillColor(...color);
+    doc.setFillColor(color[0], color[1], color[2]);
     doc.rect(margin, currentY - 5, contentWidth, 20, 'F');
     
     doc.setTextColor(255, 255, 255);
@@ -99,7 +99,7 @@ export const exportToPDF = (patientData: PatientData, treatmentPlan: TreatmentPl
     checkPageBreak(120);
     
     // Patient info box
-    doc.setFillColor(...colors.light);
+    doc.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
     doc.rect(margin, currentY, contentWidth, 100, 'F');
     doc.setDrawColor(...colors.primary);
     doc.setLineWidth(1);
